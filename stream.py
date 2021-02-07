@@ -63,9 +63,9 @@ class Stream:
             fps = self.cap.get(cv2.CAP_PROP_FPS)
             size = (self.cap.get(3), self.cap.get(4))
 
-        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         t = time.time()
-        video_name = "{}/AnownV_{}.avi".format(outFolder, t)
+        video_name = "{}/AnownV_{}.mp4".format(outFolder, t)
         self.video = cv2.VideoWriter(video_name, fourcc, fps, size)
 
     def stopRecord(self):
