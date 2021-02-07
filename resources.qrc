@@ -1,0 +1,20 @@
+<RCC>
+  <qresource prefix="Play_image">
+    <file>res/icons/play.png</file>
+  </qresource>
+  <qresource prefix="picture_icon">
+    <file>res/icons/camera.png</file>
+  </qresource>
+  <qresource prefix="pause_icon">
+    <file>res/icons/pause.png</file>
+  </qresource>
+  <qresource prefix="stopRecord_icon">
+    <file>res/icons/stop.png</file>
+  </qresource>
+  <qresource prefix="Menu_icon">
+    <file>res/icons/cil-menu.png</file>
+  </qresource>
+  <qresource prefix="Recording_icon">
+    <file>res/icons/recording.jpg</file>
+  </qresource>
+</RCC>
