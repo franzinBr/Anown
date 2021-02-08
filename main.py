@@ -17,11 +17,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.c = Controller()
         self.timer = QTimer()
+        self.timerRecord = QTimer()
         self.pauseButton.hide()
         self.startTimer()
 
         self.frame_count = 0
         self.timeDiference = 0
+        self.fps = 0
         self.record = False
         self.isPaused = False
         self.Pw = 0
@@ -36,18 +38,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.c.stream.off()
 
     def eventFilter(self, obj, event):
-        if obj is self.frameLabel and event.type() == QtCore.QEvent.MouseButtonPress:
-            p = event.pos()
-            gp = self.mapToGlobal(p)
-            rw = self.window().mapFromGlobal(gp)
-            x = int(rw.x()-((self.frameLabel.width()-self.Pw))/2)
-            y = int(rw.y()-((self.frameLabel.height()-self.Ph))/2)
-            if(x >= 0 and x <= self.Pw and y >= 0 and y <= self.Ph):
-                scaleX = self.c.stream.cap.get(3) / self.Pw
-                scaleY = self.c.stream.cap.get(4) / self.Ph
-                noScaledX = int(x * scaleX)
-                noScaledY = int(y * scaleY)
-                self.c.clickScreen(noScaledX, noScaledY)
+        if not record:
+            if obj is self.frameLabel and event.type() == QtCore.QEvent.MouseButtonPress:
+                p = event.pos()
+                gp = self.mapToGlobal(p)
+                rw = self.window().mapFromGlobal(gp)
+                x = int(rw.x()-((self.frameLabel.width()-self.Pw))/2)
+                y = int(rw.y()-((self.frameLabel.height()-self.Ph))/2)
+                if(x >= 0 and x <= self.Pw and y >= 0 and y <= self.Ph):
+                    scaleX = self.c.stream.cap.get(3) / self.Pw
+                    scaleY = self.c.stream.cap.get(4) / self.Ph
+                    noScaledX = int(x * scaleX)
+                    noScaledY = int(y * scaleY)
+                    self.c.clickScreen(noScaledX, noScaledY)
 
         return super(MainWindow, self).eventFilter(obj, event)
 
@@ -57,6 +60,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.settingsButton.clicked.connect(self.settingsButtonClicked)
         self.pauseButton.clicked.connect(self.pauseButtonClicked)
         self.timer.timeout.connect(self.update)
+        self.timerRecord.timeout.connect(self.writeVideo)
 
     def settingsButtonClicked(self):
         if self.stackedWidget.currentWidget() == self.home:
@@ -65,7 +69,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.stackedWidget.setCurrentWidget(self.home)
 
     def pauseButtonClicked(self):
+        icon = QIcon()
         self.isPaused = not self.isPaused
+        if self.isPaused:
+            icon.addFile(u":/Recording_icon/res/icons/recording.jpg", QSize(), QIcon.Normal, QIcon.Off)
+            self.pauseButton.setIcon(icon)
+            self.timerRecord.stop()
+        else:
+            icon.addFile(u":/pause_icon/res/icons/pause.png", QSize(), QIcon.Normal, QIcon.Off)
+            self.pauseButton.setIcon(icon)
+            self.timerRecord.start(1000/self.c.stream.videoFps)
+
 
     def recordButtonClicked(self):
         icon = QIcon()
@@ -77,52 +91,52 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.isPaused = False
             self.c.stream.stopRecord()
             self.settingsButton.show()
+            self.timerRecord.stop()
+            print(self.i)
 
         else:
             self.record = True
             self.pauseButton.show()
             icon.addFile(u":/stopRecord_icon/res/icons/stop.png", QSize(), QIcon.Normal, QIcon.On)
             self.recordButton.setIcon(icon)
-            self.c.stream.startRecord()
+            self.c.stream.startRecord(self.fps)
             self.settingsButton.hide()
+            self.timerRecord.start(1000/self.c.stream.videoFps)
 
     def startTimer(self):
         if self.c.stream.on():
-            self.timer.start(30)
+            self.timer.start()
+
+    def writeVideo(self):
+        self.c.stream.video.write(self.c.stream.frameProcessed)
 
     def update(self):
-        hasFrame = self.c.stream.readStream()
-        frame = self.c.stream.frame
+        hasFrame, frame = self.c.stream.read()
+        if hasFrame:
+            self.frame_count += 1
+            t = time.time()
 
-        self.frame_count += 1
-        t = time.time()
+            self.c.detector.detect(frame)
+            boxes_face, index_false = self.c.tracker.face_track(frame)
+            self.c.check(index_false)
+            if boxes_face:
+                frame = self.c.occluder.occluder(frame, boxes_face, "pixelated")
 
-        self.c.detector.detect(frame)
-        boxes_face, index_false = self.c.tracker.face_track(frame)
-        self.c.check(index_false)
-        if boxes_face:
-            frame = self.c.occluder.occluder(frame, boxes_face, "pixelated")
+            self.c.stream.frameProcessed = frame
 
-        self.c.stream.frameProcessed = frame
-        if self.record and not self.isPaused:
-            self.c.stream.video.write(self.c.stream.frameProcessed)
+            image = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0], QtGui.QImage.Format_RGB888).rgbSwapped()
+            pixmap = QtGui.QPixmap.fromImage(image)
+            w = self.width()
+            h = self.height()
+            pixmap = pixmap.scaled(w-140, h, QtCore.Qt.KeepAspectRatio)
+            self.Pw = pixmap.width()
+            self.Ph = pixmap.height()
+            self.frameLabel.setPixmap(pixmap)
 
-        self.timeDiference += time.time() - t
-        fps = self.frame_count / self.timeDiference
-
-
-        image = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0], QtGui.QImage.Format_RGB888).rgbSwapped()
-        pixmap = QtGui.QPixmap.fromImage(image)
-        w = self.width()
-        h = self.height()
-        pixmap = pixmap.scaled(w-140, h, QtCore.Qt.KeepAspectRatio)
-        self.Pw = pixmap.width()
-        self.Ph = pixmap.height()
-        self.frameLabel.setPixmap(pixmap)
-
-        if self.frame_count == 1:
-            self.timeDiference = 0
-
+            self.timeDiference += time.time() - t
+            self.fps = self.frame_count / self.timeDiference
+            if self.frame_count == 1:
+                self.timeDiference = 0
 
 if __name__ == '__main__':
     import sys

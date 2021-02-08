@@ -4,23 +4,28 @@ import cv2
 import os
 import time
 import numpy as np
-import csv
+from queue import Queue
+from threading import Thread
 
 
 class Stream:
     def __init__(self):
         self.cap = None
         self.frame = None
+        self.hasFrame = False
         self.frameProcessed = None
         self.video = None
+        self.videoFps = 0
         self.isWebcam = True
         self.ports = []
         self.resolutions = []
+        self.Q = None
 
-    def on(self, video=None):
+    def on(self, video=None, queueSize=128):
         if video:
             self.cap = cv2.VideoCapture(video)
             self.isWebcam = False
+            self.Q = Queue(maxsize=queueSize)
         else:
             self.ports = self.listCam()
             if self.ports:
@@ -29,7 +34,23 @@ class Stream:
                 self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 2000)
                 self.isWebcam = True
 
+        t = Thread(target=self.update, args=())
+        t.daemon = True
+        t.start()
         return self.cap.isOpened()
+
+    def update(self):
+        while True:
+            hasFrame, frame = self.cap.read()
+            self.frame = cv2.flip(frame, 1)
+            self.hasFrame = hasFrame
+            if not self.isWebcam and not self.Q.full():
+                self.Q.put((self.hasFrame, self.frame))
+
+    def read(self):
+        if self.isWebcam:
+            return self.hasFrame, self.frame
+        return self.Q.get()
 
     def listCam(self):
         port = 0
@@ -47,25 +68,21 @@ class Stream:
     def off(self):
         self.cap.release()
 
-    def readStream(self):
-        hasFrame, self.frame = self.cap.read()
-        self.frame = cv2.flip(self.frame, 1)
-        return hasFrame
-
-    def startRecord(self):
+    def startRecord(self, fpsExternal):
         outFolder = "Videos"
         if not os.path.exists(outFolder):
             os.makedirs(outFolder)
         if self.isWebcam:
-            fps = 20
+            fps = int(fpsExternal)
             size = (self.frameProcessed.shape[1], self.frameProcessed.shape[0])
         else:
             fps = self.cap.get(cv2.CAP_PROP_FPS)
-            size = (self.cap.get(3), self.cap.get(4))
+            size = (int(self.cap.get(3)), int(self.cap.get(4)))
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         t = time.time()
         video_name = "{}/AnownV_{}.mp4".format(outFolder, t)
+        self.videoFps = fps
         self.video = cv2.VideoWriter(video_name, fourcc, fps, size)
 
     def stopRecord(self):
