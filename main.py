@@ -38,7 +38,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.c.stream.off()
 
     def eventFilter(self, obj, event):
-        if not record:
+        if not self.record:
             if obj is self.frameLabel and event.type() == QtCore.QEvent.MouseButtonPress:
                 p = event.pos()
                 gp = self.mapToGlobal(p)
