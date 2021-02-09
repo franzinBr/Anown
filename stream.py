@@ -22,11 +22,12 @@ class Stream:
         self.resolutions = []
         self.Q = None
 
-    def on(self, video=None, queueSize=128):
+    def on(self, video=None, queueSize=1024):
         if video:
             self.cap = cv2.VideoCapture(video)
             self.isWebcam = False
             self.Q = Queue(maxsize=queueSize)
+            self.videoFps = self.cap.get(cv2.CAP_PROP_FPS)
         else:
             self.ports = self.listCam()
             if self.ports:
@@ -42,15 +43,23 @@ class Stream:
 
     def update(self):
         while True:
-            hasFrame, frame = self.cap.read()
-            self.frame = cv2.flip(frame, 1)
-            self.hasFrame = hasFrame
+            if self.isWebcam:
+                hasFrame, frame = self.cap.read()
+                self.frame = cv2.flip(frame, 1)
+                self.hasFrame = hasFrame
             if not self.isWebcam and not self.Q.full():
+                hasFrame, frame = self.cap.read()
+                self.frame = cv2.flip(frame, 1)
+                self.hasFrame = hasFrame
                 self.Q.put((self.hasFrame, self.frame))
+
+            if not self.hasFrame:
+                return 0
 
     def read(self):
         if self.isWebcam:
             return self.hasFrame, self.frame
+        print("aqui")
         return self.Q.get()
 
     def listCam(self):
@@ -79,7 +88,7 @@ class Stream:
         if not os.path.exists(outFolder):
             os.makedirs(outFolder)
         if self.isWebcam:
-            fps = int(fpsExternal)
+            fps = int(fpsExternal) - 5
             size = (self.frameProcessed.shape[1], self.frameProcessed.shape[0])
         else:
             fps = self.cap.get(cv2.CAP_PROP_FPS)

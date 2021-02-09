@@ -92,7 +92,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.c.stream.stopRecord()
             self.settingsButton.show()
             self.timerRecord.stop()
-            print(self.i)
 
         else:
             self.record = True
@@ -113,9 +112,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def update(self):
         hasFrame, frame = self.c.stream.read()
         if hasFrame:
+            print("aqui2")
             self.frame_count += 1
             t = time.time()
 
+            self.c.framePreProcessed = frame.copy()
             self.c.detector.detect(frame)
             boxes_face, index_false = self.c.tracker.face_track(frame)
             self.c.check(index_false)
@@ -137,6 +138,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.fps = self.frame_count / self.timeDiference
             if self.frame_count == 1:
                 self.timeDiference = 0
+
+            if not self.c.stream.isWebcam and self.c.stream.videoFps < self.fps:
+                print(f"FPS:{self.fps} FPSVid{self.c.stream.videoFps} = {round(1000/(self.fps - self.c.stream.videoFps))}")
+                cv2.waitKey(round(1000/(self.fps - self.c.stream.videoFps)))
+        else:
+            print("quebrou")
+
 
 if __name__ == '__main__':
     import sys

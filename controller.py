@@ -17,6 +17,7 @@ class Controller:
         self.recognizer = Face_recognizer()
         self.occluder = Face_occluder()
         self.iface_wanted = []
+        self.framePreProcessed = None
 
     def check(self, iT_suspect):
         for i in iT_suspect:
@@ -24,7 +25,7 @@ class Controller:
 
         if self.iface_wanted:
             facesd = self.recognizer.transform128D(
-                self.detector.boxes_face, self.stream.frame
+                self.detector.boxes_face, self.framePreProcessed
             )
 
         facew_remove = []
@@ -33,7 +34,7 @@ class Controller:
             if type(face) is not bool:
                 track = dlib.correlation_tracker()
                 r = dlib.rectangle(face[0], face[1], face[2], face[3])
-                rgb = cv2.cvtColor(self.stream.frame, cv2.COLOR_BGR2RGB)
+                rgb = cv2.cvtColor(self.framePreProcessed, cv2.COLOR_BGR2RGB)
                 track.start_track(rgb, r)
                 self.tracker.trackers[face_dec[1]] = track
                 facew_remove.append([face_dec[0], face_dec[1]])
@@ -58,12 +59,12 @@ class Controller:
             if self.isPointInRect(x, y, faceD):
                 track = dlib.correlation_tracker()
                 r = dlib.rectangle(faceD[0], faceD[1], faceD[2], faceD[3])
-                rgb = cv2.cvtColor(self.stream.frame, cv2.COLOR_BGR2RGB)
+                rgb = cv2.cvtColor(self.framePreProcessed, cv2.COLOR_BGR2RGB)
                 track.start_track(rgb, r)
                 self.tracker.trackers.append(track)
 
-                shape = self.recognizer.sp(self.stream.frame, r)
-                align_face = dlib.get_face_chip(self.stream.frame, shape)
+                shape = self.recognizer.sp(self.framePreProcessed, r)
+                align_face = dlib.get_face_chip(self.framePreProcessed, shape)
                 face_descriptor = (
                     self.recognizer.facerec.compute_face_descriptor(
                         align_face
