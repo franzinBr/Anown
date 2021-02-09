@@ -2,6 +2,9 @@
   <qresource prefix="Play_image">
     <file>res/icons/play.png</file>
   </qresource>
+  <qresource prefix="picture_effect">
+    <file>res/sound_effects/picture.mp3</file>
+  </qresource>
   <qresource prefix="picture_icon">
     <file>res/icons/camera.png</file>
   </qresource>

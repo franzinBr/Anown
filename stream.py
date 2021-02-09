@@ -4,6 +4,7 @@ import cv2
 import os
 import time
 import numpy as np
+from playsound import playsound
 from queue import Queue
 from threading import Thread
 
@@ -69,6 +70,11 @@ class Stream:
         self.cap.release()
 
     def startRecord(self, fpsExternal):
+        pSound = "res/sound_effects/record.wav"
+        tSound = Thread(target=self.playSound, args=(pSound,))
+        tSound.daemon = True
+        tSound.start()
+
         outFolder = "Videos"
         if not os.path.exists(outFolder):
             os.makedirs(outFolder)
@@ -85,11 +91,24 @@ class Stream:
         self.videoFps = fps
         self.video = cv2.VideoWriter(video_name, fourcc, fps, size)
 
+    def playSound(self, path):
+        playsound(path)
+
     def stopRecord(self):
+        pSound = "res/sound_effects/record_off.wav"
+        tSound = Thread(target=self.playSound, args=(pSound,))
+        tSound.daemon = True
+        tSound.start()
+
         self.video.release()
         self.video = None
 
     def takePicture(self):
+        pSound = "res/sound_effects/picture.mp3"
+        tSound = Thread(target=self.playSound, args=(pSound,))
+        tSound.daemon = True
+        tSound.start()
+
         outFolder = "Pictures"
         if not os.path.exists(outFolder):
             os.makedirs(outFolder)
