@@ -19,6 +19,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.timer = QTimer()
         self.timerRecord = QTimer()
         self.pauseButton.hide()
+        self.closeFileButton.hide()
         self.startTimer()
 
         self.frame_count = 0
@@ -59,8 +60,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pictureButton.clicked.connect(self.c.stream.takePicture)
         self.settingsButton.clicked.connect(self.settingsButtonClicked)
         self.pauseButton.clicked.connect(self.pauseButtonClicked)
+        self.fileButton.clicked.connect(self.fileButtonClicked)
+        self.closeFileButton.clicked.connect(self.closeFileButtonClicked)
         self.timer.timeout.connect(self.update)
         self.timerRecord.timeout.connect(self.writeVideo)
+
+    def fileButtonClicked(self):
+        fileName = QFileDialog.getOpenFileName(self, "Open video", QtCore.QDir.homePath(), "Video Files (*.mp4 *.avi)")
+        if fileName[0]:
+            self.closeFileButton.show()
+            self.timer.stop()
+            self.c.stream.off()
+            self.c.clear()
+            self.c.stream.on(fileName[0])
+            self.timer.start()
+
+    def closeFileButtonClicked(self):
+        self.closeFileButton.hide()
+        self.timer.stop()
+        self.c.stream.off()
+        self.c.clear()
+        self.c.stream.on()
+        self.timer.start()
 
     def settingsButtonClicked(self):
         if self.stackedWidget.currentWidget() == self.home:
@@ -112,7 +133,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def update(self):
         hasFrame, frame = self.c.stream.read()
         if hasFrame:
-            print("aqui2")
             self.frame_count += 1
             t = time.time()
 
@@ -140,10 +160,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.timeDiference = 0
 
             if not self.c.stream.isWebcam and self.c.stream.videoFps < self.fps:
-                print(f"FPS:{self.fps} FPSVid{self.c.stream.videoFps} = {round(1000/(self.fps - self.c.stream.videoFps))}")
+                # print(f"FPS:{self.fps} FPSVid{self.c.stream.videoFps} = {round(1000/(self.fps - self.c.stream.videoFps))}")
                 cv2.waitKey(round(1000/(self.fps - self.c.stream.videoFps)))
         else:
-            print("quebrou")
+            pass
 
 
 if __name__ == '__main__':

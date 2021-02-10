@@ -19,6 +19,13 @@ class Controller:
         self.iface_wanted = []
         self.framePreProcessed = None
 
+    def clear(self):
+        self.detector = Face_detector()
+        self.tracker = Face_tracker()
+        self.recognizer = Face_recognizer()
+        self.iface_wanted = []
+        self.framePreProcessed = None
+
     def check(self, iT_suspect):
         for i in iT_suspect:
             self.iface_wanted.append([self.recognizer.face_descriptors[i], i])

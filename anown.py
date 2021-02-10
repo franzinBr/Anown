@@ -34,7 +34,7 @@ class Ui_MainWindow(object):
         self.frame_left.setFrameShape(QFrame.StyledPanel)
         self.frame_left.setFrameShadow(QFrame.Raised)
         self.verticalLayout_4 = QVBoxLayout(self.frame_left)
-        self.verticalLayout_4.setSpacing(0)
+        self.verticalLayout_4.setSpacing(10)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.settingsButton = QPushButton(self.frame_left)
@@ -61,6 +61,48 @@ class Ui_MainWindow(object):
         self.verticalSpacer_4 = QSpacerItem(20, 555, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_4.addItem(self.verticalSpacer_4)
+
+        self.closeFileButton = QPushButton(self.frame_left)
+        self.closeFileButton.setObjectName(u"closeFileButton")
+        self.closeFileButton.setStyleSheet(u"QPushButton {\n"
+"border: none;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+" border: 2px solid;\n"
+" border-color: rgb(180, 180, 180);\n"
+"}\n"
+"\n"
+"QPushButton:pressed {	\n"
+"	background-color: rgb(85, 170, 255);\n"
+"}")
+        icon1 = QIcon()
+        icon1.addFile(u":/closeFile_icon/res/icons/close.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.closeFileButton.setIcon(icon1)
+        self.closeFileButton.setIconSize(QSize(25, 25))
+
+        self.verticalLayout_4.addWidget(self.closeFileButton)
+
+        self.fileButton = QPushButton(self.frame_left)
+        self.fileButton.setObjectName(u"fileButton")
+        self.fileButton.setStyleSheet(u"QPushButton {\n"
+"border: none;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+" border: 2px solid;\n"
+" border-color: rgb(180, 180, 180);\n"
+"}\n"
+"\n"
+"QPushButton:pressed {	\n"
+"	background-color: rgb(85, 170, 255);\n"
+"}")
+        icon2 = QIcon()
+        icon2.addFile(u":/openFile_icon/res/icons/open_file.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.fileButton.setIcon(icon2)
+        self.fileButton.setIconSize(QSize(25, 25))
+
+        self.verticalLayout_4.addWidget(self.fileButton)
 
 
         self.horizontalLayout.addWidget(self.frame_left)
@@ -159,9 +201,9 @@ class Ui_MainWindow(object):
 " border-color: rgb(221, 70, 10);\n"
 " border-width:3px;\n"
 "}")
-        icon1 = QIcon()
-        icon1.addFile(u":/Recording_icon/res/icons/recording.jpg", QSize(), QIcon.Normal, QIcon.Off)
-        self.recordButton.setIcon(icon1)
+        icon3 = QIcon()
+        icon3.addFile(u":/Recording_icon/res/icons/recording.jpg", QSize(), QIcon.Normal, QIcon.Off)
+        self.recordButton.setIcon(icon3)
         self.recordButton.setIconSize(QSize(60, 60))
         self.pauseButton = QPushButton(self.frame_4)
         self.pauseButton.setObjectName(u"pauseButton")
@@ -188,9 +230,9 @@ class Ui_MainWindow(object):
 "	background-color: rgb(200, 200, 200);\n"
 "}\n"
 "")
-        icon2 = QIcon()
-        icon2.addFile(u":/pause_icon/res/icons/pause.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.pauseButton.setIcon(icon2)
+        icon4 = QIcon()
+        icon4.addFile(u":/pause_icon/res/icons/pause.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.pauseButton.setIcon(icon4)
         self.pauseButton.setIconSize(QSize(40, 40))
         self.pictureButton = QPushButton(self.frame_4)
         self.pictureButton.setObjectName(u"pictureButton")
@@ -217,9 +259,9 @@ class Ui_MainWindow(object):
 "	background-color: rgb(200, 200, 200);\n"
 "}\n"
 "")
-        icon3 = QIcon()
-        icon3.addFile(u":/picture_icon/res/icons/camera.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.pictureButton.setIcon(icon3)
+        icon5 = QIcon()
+        icon5.addFile(u":/picture_icon/res/icons/camera.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.pictureButton.setIcon(icon5)
         self.pictureButton.setIconSize(QSize(30, 30))
 
         self.verticalLayout_3.addWidget(self.frame_4)
@@ -312,6 +354,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Anown", None))
         self.settingsButton.setText("")
+        self.closeFileButton.setText("")
+        self.fileButton.setText("")
         self.frameLabel.setText("")
         self.recordButton.setText("")
         self.pauseButton.setText("")

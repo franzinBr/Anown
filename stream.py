@@ -22,7 +22,7 @@ class Stream:
         self.resolutions = []
         self.Q = None
 
-    def on(self, video=None, queueSize=1024):
+    def on(self, video="", queueSize=1024):
         if video:
             self.cap = cv2.VideoCapture(video)
             self.isWebcam = False
@@ -59,7 +59,6 @@ class Stream:
     def read(self):
         if self.isWebcam:
             return self.hasFrame, self.frame
-        print("aqui")
         return self.Q.get()
 
     def listCam(self):
