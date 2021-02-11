@@ -66,7 +66,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.timerRecord.timeout.connect(self.writeVideo)
 
     def fileButtonClicked(self):
-        fileName = QFileDialog.getOpenFileName(self, "Open video", QtCore.QDir.homePath(), "Video Files (*.mp4 *.avi)")
+        fileName = QFileDialog.getOpenFileName(self, "Open video", QtCore.QDir.homePath(), "Video Files (*.mp4 *.avi *.gif)")
         if fileName[0]:
             self.closeFileButton.show()
             self.timer.stop()
@@ -112,6 +112,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.isPaused = False
             self.c.stream.stopRecord()
             self.settingsButton.show()
+            self.fileButton.show()
             self.timerRecord.stop()
 
         else:
@@ -121,6 +122,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.recordButton.setIcon(icon)
             self.c.stream.startRecord(self.fps)
             self.settingsButton.hide()
+            self.fileButton.hide()
             self.timerRecord.start(1000/self.c.stream.videoFps)
 
     def startTimer(self):
@@ -162,6 +164,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if not self.c.stream.isWebcam and self.c.stream.videoFps < self.fps:
                 # print(f"FPS:{self.fps} FPSVid{self.c.stream.videoFps} = {round(1000/(self.fps - self.c.stream.videoFps))}")
                 cv2.waitKey(round(1000/(self.fps - self.c.stream.videoFps)))
+            else:
+                pass
         else:
             pass
 

@@ -23,8 +23,10 @@ class Controller:
         self.detector = Face_detector()
         self.tracker = Face_tracker()
         self.recognizer = Face_recognizer()
+        self.stream.clearCache()
         self.iface_wanted = []
         self.framePreProcessed = None
+
 
     def check(self, iT_suspect):
         for i in iT_suspect:

@@ -52,13 +52,17 @@ class Stream:
                 self.frame = cv2.flip(frame, 1)
                 self.hasFrame = hasFrame
                 self.Q.put((self.hasFrame, self.frame))
+            elif not self.isWebcam and self.Q.full():
+                pass
 
             if not self.hasFrame:
-                return 0
+                break
 
     def read(self):
         if self.isWebcam:
             return self.hasFrame, self.frame
+        if self.Q.qsize() <= 0:
+            return False, None
         return self.Q.get()
 
     def listCam(self):
@@ -123,3 +127,8 @@ class Stream:
         t = time.time()
         img_name = "{}/AnownP_{}.png".format(outFolder, t)
         cv2.imwrite(img_name, self.frameProcessed)
+
+    def clearCache(self):
+        self.Q = None
+        self.frame = None
+        self.hasFrame = False
