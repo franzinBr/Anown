@@ -22,11 +22,14 @@ class Stream:
         self.resolutions = []
         self.Q = None
 
+        self.stopped = False
+
     def on(self, video="", queueSize=1024):
         if video:
             self.cap = cv2.VideoCapture(video)
+            frameAmount = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
             self.isWebcam = False
-            self.Q = Queue(maxsize=queueSize)
+            self.Q = Queue(maxsize=frameAmount)
             self.videoFps = self.cap.get(cv2.CAP_PROP_FPS)
         else:
             self.ports = self.listCam()
@@ -36,27 +39,34 @@ class Stream:
                 self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 2000)
                 self.isWebcam = True
 
-        t = Thread(target=self.update, args=())
+        self.stopped = False
+        if self.isWebcam:
+            t = Thread(target=self.updateWebcam, args=())
+        else:
+            t = Thread(target=self.updateExternalVideo, args=())
+
         t.daemon = True
         t.start()
         return self.cap.isOpened()
 
-    def update(self):
-        while True:
-            if self.isWebcam:
-                hasFrame, frame = self.cap.read()
-                self.frame = cv2.flip(frame, 1)
-                self.hasFrame = hasFrame
-            if not self.isWebcam and not self.Q.full():
-                hasFrame, frame = self.cap.read()
-                self.frame = cv2.flip(frame, 1)
-                self.hasFrame = hasFrame
-                self.Q.put((self.hasFrame, self.frame))
-            elif not self.isWebcam and self.Q.full():
-                pass
+    def updateExternalVideo(self):
+        while not self.Q.full():
+            if self.stopped:
+                return
+            print(self.Q.qsize())
+            hasFrame, frame = self.cap.read()
+            self.frame = cv2.flip(frame, 1)
+            self.hasFrame = hasFrame
+            self.Q.put((self.hasFrame, self.frame))
+        return
 
-            if not self.hasFrame:
-                break
+    def updateWebcam(self):
+        while True:
+            if self.stopped:
+                return
+            hasFrame, frame = self.cap.read()
+            self.frame = cv2.flip(frame, 1)
+            self.hasFrame = hasFrame
 
     def read(self):
         if self.isWebcam:
@@ -91,7 +101,7 @@ class Stream:
         if not os.path.exists(outFolder):
             os.makedirs(outFolder)
         if self.isWebcam:
-            fps = int(fpsExternal) - 5
+            fps = int(fpsExternal) - 10
             size = (self.frameProcessed.shape[1], self.frameProcessed.shape[0])
         else:
             fps = self.cap.get(cv2.CAP_PROP_FPS)
@@ -130,5 +140,7 @@ class Stream:
 
     def clearCache(self):
         self.Q = None
+        self.cap = None
         self.frame = None
         self.hasFrame = False
+        self.stopped = True

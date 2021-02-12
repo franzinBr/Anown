@@ -72,7 +72,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.timer.stop()
             self.c.stream.off()
             self.c.clear()
+            # self.setUpdatesEnabled(False)
             self.c.stream.on(fileName[0])
+            # self.setUpdatesEnabled(True)
             self.timer.start()
 
     def closeFileButtonClicked(self):
@@ -135,6 +137,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def update(self):
         hasFrame, frame = self.c.stream.read()
         if hasFrame:
+
             self.frame_count += 1
             t = time.time()
 
@@ -158,6 +161,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.timeDiference += time.time() - t
             self.fps = self.frame_count / self.timeDiference
+
             if self.frame_count == 1:
                 self.timeDiference = 0
 
