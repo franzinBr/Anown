@@ -87,9 +87,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def settingsButtonClicked(self):
         if self.stackedWidget.currentWidget() == self.home:
+            self.timer.stop()
             self.stackedWidget.setCurrentWidget(self.settings)
+            self.anim = QPropertyAnimation(self.settings, b"geometry")
+            self.anim.setDuration(500)
+            self.anim.setStartValue(QRect(0, 0, 0, self.height()))
+            self.anim.setEndValue(QRect(0, 0, self.width()-40, self.height()))
+            self.anim.setEasingCurve(QtCore.QEasingCurve.Linear)
+            self.anim.start()
+            self.fileButton.hide()
         else:
-            self.stackedWidget.setCurrentWidget(self.home)
+            self.anim2 = QPropertyAnimation(self.settings, b"geometry")
+            self.anim2.setDuration(500)
+            self.anim2.setStartValue(QRect(0, 0, self.width()-40, self.height()))
+            self.anim2.setEndValue(QRect(0, 0, 0, self.height()))
+            self.anim2.setEasingCurve(QtCore.QEasingCurve.Linear)
+            self.anim2.start()
+            self.anim2.finished.connect(lambda: self.stackedWidget.setCurrentWidget(self.home))
+            self.fileButton.show()
+            self.timer.start()
+
 
     def pauseButtonClicked(self):
         icon = QIcon()

@@ -213,6 +213,9 @@ QPushButton:pressed {
        </property>
        <item>
         <widget class="QStackedWidget" name="stackedWidget">
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(0, 0, 0);</string>
+         </property>
          <property name="currentIndex">
           <number>0</number>
          </property>

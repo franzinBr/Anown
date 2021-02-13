@@ -118,6 +118,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.stackedWidget = QStackedWidget(self.frame_right)
         self.stackedWidget.setObjectName(u"stackedWidget")
+        self.stackedWidget.setStyleSheet(u"background-color: rgb(0, 0, 0);")
         self.home = QWidget()
         self.home.setObjectName(u"home")
         self.horizontalLayout_2 = QHBoxLayout(self.home)
